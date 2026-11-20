@@ -81,7 +81,8 @@ jobs:
           mv "linux-$KVER" linux-src
 
       - name: Save Linux kernel source cache
-        if: success()
+        if: success() && steps.cache-kernel.outputs.cache-hit != 'true'
+        continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: linux-${{ env.KVER }}.tar.xz
@@ -110,7 +111,8 @@ jobs:
           fi
 
       - name: Save Alpine rootfs cache
-        if: success()
+        if: success() && steps.cache-alpine.outputs.cache-hit != 'true'
+        continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: alpine-minirootfs-${{ env.AVER }}-x86_64.tar.gz
@@ -233,4 +235,4 @@ jobs:
           grep -q 'cmd exit code: 0' uml.log || { echo '::error::custom command finished with a non-zero status'; exit 1; }
           grep -q 'Power down' uml.log || { echo '::error::guest did not power down cleanly'; exit 1; }
           echo "::notice::custom command ran inside Alpine $AVER on UML kernel $KVER over veth+NAT with ${MEM}M guest RAM, ncpus=${NCPU} (img root)"
-# sync-nonce: 6f7e1177d7393856
+# sync-nonce: 0350dfe59cdf9d56
